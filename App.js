@@ -33,11 +33,24 @@ function App() {
         return [];
       });
 
-    const fetchContactData = fetch('contact.json')
+    const fetchContactData = fetch("https://opensheet.elk.sh/15yaPj6AQRL7hqYbBtATUOJjddt3kEkRA7Jvm3KyqmRg/Sheet2")
       .then(res => res.json())
+      .then(rows => {
+        if (rows && rows.length > 1) {
+          return { contact: rows[1] };
+        } else if (rows && rows.length > 0) {
+          return { contact: rows[0] };
+        }
+        throw new Error("Sheet empty");
+      })
       .catch(err => {
-        console.error("Contact Error:", err);
-        return { contact: null };
+        console.warn("Sheet Contact Error, falling back to JSON:", err);
+        return fetch('contact.json')
+          .then(res => res.json())
+          .catch(err => {
+            console.error("Contact Error:", err);
+            return { contact: null };
+          });
       });
 
     Promise.all([fetchSheetData, fetchContactData])
